@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qoyod Marketing Ops</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f3f9;color:#1a1f36;font-size:13px;min-height:100vh;}
+.header{background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 60%,#7c3aed 100%);color:#fff;padding:16px 20px;position:relative;overflow:hidden;}
+.header::after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05);}
+.h-title{font-size:16px;font-weight:800;letter-spacing:-.3px;}
+.h-sub{font-size:11px;opacity:.7;margin-top:2px;}
+.h-chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.chip{padding:3px 10px;border-radius:14px;font-size:10px;font-weight:700;}
+.chip-date{background:rgba(255,255,255,.15);}
+.chip-alert{background:rgba(239,68,68,.4);}
+.chip-warn{background:rgba(245,158,11,.4);}
+.chip-ok{background:rgba(16,185,129,.35);}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:9px 14px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.tab.active{color:#4338ca;border-bottom-color:#4338ca;}
+.section{display:none;padding:14px;flex-direction:column;gap:12px;}
+.section.active{display:flex;}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.card-title{font-size:12px;font-weight:700;color:#1e293b;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.card-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:#e2e8f0;color:#64748b;}
+.hex-notice{background:#0f172a;color:#fff;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.hex-label{font-size:11px;font-weight:700;opacity:.6;letter-spacing:.5px;text-transform:uppercase;}
+.hex-link{font-size:11px;font-weight:700;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:8px;color:#fff;text-decoration:none;}
+.sales-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sale-card{background:#fff;border-radius:10px;padding:12px;border-left:3px solid;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.sale-card.green{border-color:#059669;} .sale-card.orange{border-color:#d97706;}
+.sale-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-bottom:3px;}
+.sale-val{font-size:22px;font-weight:800;line-height:1;}
+.sale-val.green{color:#059669;} .sale-val.orange{color:#d97706;}
+.sale-sub{font-size:10px;color:#94a3b8;margin-top:2px;}
+.ai-card{background:linear-gradient(135deg,#1e1b4b,#4338ca);color:#fff;border-radius:14px;padding:16px;}
+.ai-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.ai-title{font-size:13px;font-weight:800;}
+.ai-sub{font-size:11px;opacity:.7;}
+.ai-body{font-size:12px;line-height:1.65;opacity:.92;}
+.ai-insight{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);}
+.ai-insight:last-child{border-bottom:none;padding-bottom:0;}
+.ai-num{font-size:10px;font-weight:800;background:rgba(255,255,255,.15);padding:1px 7px;border-radius:8px;margin-right:6px;}
+.cal-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9;}
+.cal-row:last-child{border-bottom:none;}
+.cal-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.cal-red{background:#ef4444;} .cal-amber{background:#f59e0b;} .cal-blue{background:#3b82f6;} .cal-green{background:#10b981;}
+.cal-event{font-size:12px;font-weight:600;color:#1e293b;flex:1;}
+.cal-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap;}
+.cb-urgent{background:#fee2e2;color:#dc2626;} .cb-soon{background:#fef9c3;color:#92400e;}
+.cb-ok{background:#dcfce7;color:#16a34a;} .cb-past{background:#f1f5f9;color:#94a3b8;}
+.proj-item{background:#fff;border-radius:10px;padding:11px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.proj-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.proj-name{font-size:12px;font-weight:600;color:#1e293b;flex:1;margin-right:8px;}
+.pct-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;}
+.pg{background:#dcfce7;color:#16a34a;} .pw{background:#fef9c3;color:#ca8a04;} .pr{background:#fee2e2;color:#dc2626;}
+.proj-meta{font-size:11px;color:#94a3b8;margin-bottom:6px;}
+.prog{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;}
+.prog-f{height:100%;border-radius:3px;}
+.task-row{background:#fff;border-radius:8px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.04);gap:8px;}
+.task-row.ov{border-left:3px solid #ef4444;} .task-row.sn{border-left:3px solid #f59e0b;}
+.task-nm{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.task-due{font-size:10px;font-weight:600;white-space:nowrap;}
+.tov{color:#dc2626;} .tsn{color:#d97706;} .tok{color:#94a3b8;}
+.agent-hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.agent-hub-card{background:#fff;border-radius:12px;padding:13px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:3px solid;}
+.ah1{border-color:#3b82f6;} .ah2{border-color:#8b5cf6;} .ah3{border-color:#ec4899;} .ah4{border-color:#10b981;opacity:.6;}
+.ah-icon{font-size:22px;margin-bottom:4px;}
+.ah-name{font-size:12px;font-weight:700;margin-bottom:4px;}
+.ah-status{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748b;margin-bottom:6px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.d-yl{background:#f59e0b;} .d-off{background:#cbd5e1;}
+.ah-report-item{font-size:10px;color:#475569;background:#f8fafc;padding:3px 7px;border-radius:6px;margin-bottom:3px;}
+.ah-pending{font-size:11px;font-weight:700;color:#4338ca;margin-top:6px;}
+.chart-wrap{position:relative;height:130px;}
+.scroll{max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;}
+.scroll::-webkit-scrollbar{width:3px;}
+.scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px;}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+.loading{animation:shimmer 1.4s infinite;}
+.footer{text-align:center;font-size:10px;color:#94a3b8;padding:8px 0 16px;}
+.alert-bar{border-radius:10px;padding:10px 12px;font-size:12px;font-weight:500;margin-bottom:2px;}
+.alert-red{background:#fee2e2;color:#b91c1c;} .alert-amber{background:#fef9c3;color:#92400e;}
+.alert-green{background:#dcfce7;color:#166534;} .alert-blue{background:#dbeafe;color:#1d4ed8;}
+.refresh-btn{background:#4338ca;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px;}
+.refresh-btn:hover{background:#3730a3;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <div class="h-title">ð Marketing Ops Brief</div>
+      <div class="h-sub">Shatha Alsafadi Â· Qoyod Marketing</div>
+    </div>
+    <button class="refresh-btn" onclick="location.reload()">â» Refresh</button>
+  </div>
+  <div class="h-chips">
+    <span class="chip chip-date" id="dateChip">â</span>
+    <span class="chip chip-warn" id="calChip" style="display:none"></span>
+    <span class="chip chip-alert" id="overdueChip" style="display:none"></span>
+    <span class="chip chip-ok" id="dealsChip" style="display:none"></span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('brief')">ð Brief</div>
+  <div class="tab" onclick="showTab('analysis')">ð§  Analysis</div>
+  <div class="tab" onclick="showTab('projects')">ð Projects</div>
+  <div class="tab" onclick="showTab('tasks')">â Tasks</div>
+  <div class="tab" onclick="showTab('agents')">ð¤ Agents</div>
+</div>
+
+<!-- BRIEF TAB -->
+<div class="section active" id="tab-brief">
+  <div id="calAlerts"></div>
+
+  <div class="hex-notice">
+    <div>
+      <div class="hex-label">Paid &amp; Organic Numbers</div>
+      <div style="font-size:12px;margin-top:2px;opacity:.85">Live in your HEX Dashboard</div>
+    </div>
+    <span class="hex-link">â HEX</span>
+  </div>
+
+  <div>
+    <div class="card-title" style="margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700;color:#1e293b">ð¼ Sales Reference <span style="font-size:10px;color:#94a3b8;font-weight:400">â HubSpot Â· deals &amp; lead quality</span></span>
+      <span class="card-badge">Live</span>
+    </div>
+    <div class="sales-grid">
+      <div class="sale-card green">
+        <div class="sale-lbl">Deals Won Today</div>
+        <div class="sale-val green loading" id="dwVal">â</div>
+        <div class="sale-sub" id="dwSub">loadingâ¦</div>
+      </div>
+      <div class="sale-card orange">
+        <div class="sale-lbl">Revenue Today</div>
+        <div class="sale-val orange loading" id="rvVal">â</div>
+        <div class="sale-sub" id="rvSub">SAR</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div class="sale-card" style="border-color:#7c3aed">
+        <div class="sale-lbl">Deals This Month</div>
+        <div class="sale-val loading" style="color:#7c3aed" id="dwMonthVal">â</div>
+        <div class="sale-sub" id="dwMonthSub">loadingâ¦</div>
+      </div>
+      <div class="sale-card" style="border-color:#2563eb">
+        <div class="sale-lbl">Total Leads in CRM</div>
+        <div class="sale-val loading" style="color:#2563eb" id="ldTotalVal">â</div>
+        <div class="sale-sub">lifecycle = lead</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>ð Project Health</span>
+      <span class="card-badge" id="projSummary">loadingâ¦</span>
+    </div>
+    <div class="chart-wrap"><canvas id="healthChart"></canvas></div>
+  </div>
+
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:#1e293b">â ï¸ Needs Attention</span>
+      <a href="javascript:showTab('projects')" style="font-size:11px;color:#4338ca;text-decoration:none;font-weight:600">All projects â</a>
+    </div>
+    <div class="scroll" style="max-height:240px" id="riskList">
+      <div class="loading" style="text-align:center;padding:16px;color:#94a3b8">Loadingâ¦</div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYSIS TAB -->
+<div class="section" id="tab-analysis">
+  <div class="ai-card">
+    <div class="ai-header">
+      <span class="ai-title">ð§  AI Analysis</span>
+      <span class="ai-sub" id="aiStatus">Computingâ¦</span>
+    </div>
+    <div class="ai-body" id="aiBody">
+      <div class="loading" style="opacity:.6">Analyzing dataâ¦</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>ð Saudi Business Calendar 2026</span></div>
+    <div id="calendarList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>ð Business Context</span></div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#475569;line-height:1.6">
+      <div>â¢ <strong>Qoyod:</strong> B2B accounting SaaS for Saudi SMBs. SAR-denominated. Deal range SAR 120Â3,300.</div>
+      <div>â¢ <strong>Seasonality:</strong> Q2 strong (fiscal year-end), post-Eid surge, National Day = brand campaigns.</div>
+      <div>â¢ <strong>Paid/Organic:</strong> Live metrics in HEX â HubSpot = deal velocity + lead quality only.</div>
+      <div>â¢ <strong>Growth consultant:</strong> Mohammad Irsheid â SEO/AEO/CRM, 10â15 hrs/week (11,256 SAR/mo).</div>
+      <div>â¢ <strong>Newsletter:</strong> Fahad Alanazi â Arabic content (8,000 SAR/mo, through Dec 2026).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>ð Deal Velocity â Today vs Month Avg</span></div>
+    <div class="chart-wrap"><canvas id="velocityChart"></canvas></div>
+  </div>
+</div>
+
+<!-- PROJECTS TAB -->
+<div class="section" id="tab-projects">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;font-weight:700">ð All Marketing Projects</span>
+    <span class="card-badge" id="allProjCount">â</span>
+  </div>
+  <div class="scroll" style="max-height:600px" id="allProjList">
+    <div class="loading" style="text-align:center;padding:20px;color:#94a3b8">Loadingâ¦</div>
+  </div>
+</div>
+
+<!-- TASKS TAB -->
+<div class="section" id="tab-tasks">
+  <div id="overdueAlert" style="display:none"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;font-weight:700">â My Open Tasks</span>
+    <span class="card-badge" id="taskCount">â</span>
+  </div>
+  <div class="scroll" style="max-height:560px" id="taskList">
+    <div class="loading" style="text-align:center;padding:20px;color:#94a3b8">Loadingâ¦</div>
+  </div>
+</div>
+
+<!-- AGENTS TAB -->
+<div class="section" id="tab-agents">
+  <div class="alert-bar alert-blue">
+    ð Agent workload pulled live from Asana. Digital Â· Product Â· Creative status below.
+  </div>
+  <div class="agent-hub-grid">
+    <div class="agent-hub-card ah1">
+      <div class="ah-icon">ð£</div>
+      <div class="ah-name">Digital Marketing</div>
+      <div class="ah-status"><span class="dot d-yl"></span>Via Asana</div>
+      <div class="ah-report-item">Paid performance (â HEX)</div>
+      <div class="ah-report-item">Campaign health</div>
+      <div class="ah-pending loading" id="ag-digital">â open tasks</div>
+    </div>
+    <div class="agent-hub-card ah2">
+      <div class="ah-icon">ð¦</div>
+      <div class="ah-name">Product Marketing</div>
+      <div class="ah-status"><span class="dot d-yl"></span>Via Asana</div>
+      <div class="ah-report-item">Content calendar</div>
+      <div class="ah-report-item">CRM lifecycle</div>
+      <div class="ah-pending loading" id="ag-product">â open tasks</div>
+    </div>
+    <div class="agent-hub-card ah3">
+      <div class="ah-icon">ð¨</div>
+      <div class="ah-name">Creative Director</div>
+      <div class="ah-status"><span class="dot d-yl"></span>Via Asana</div>
+      <div class="ah-report-item">Design pipeline</div>
+      <div class="ah-report-item">Asset requests</div>
+      <div class="ah-pending loading" id="ag-creative">â open tasks</div>
+    </div>
+    <div class="agent-hub-card ah4">
+      <div class="ah-icon">ð</div>
+      <div class="ah-name">Affiliate</div>
+      <div class="ah-status"><span class="dot d-off"></span>Coming soon</div>
+      <div class="ah-report-item">Partner tracking</div>
+      <div class="ah-pending" style="color:#94a3b8">Not connected</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>ð Agent Workload (open tasks)</span></div>
+    <div class="chart-wrap"><canvas id="agentChart"></canvas></div>
+  </div>
+</div>
+
+<div class="footer" id="footer">Loadingâ¦</div>
+
+<script>
+function showTab(t){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  const map={brief:'ð Brief',analysis:'ð§  Analysis',projects:'ð Projects',tasks:'â Tasks',agents:'ð¤ Agents'};
+  document.querySelectorAll('.tab').forEach(x=>{if(x.textContent.trim()===map[t])x.classList.add('active');});
+}
+
+(async () => {
+  const now = new Date();
+  const todayTs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const monthTs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const dim = now.getDate(); // days into month
+
+  // Header date
+  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dateChip').textContent=`${DAYS[now.getDay()]} ${now.getDate()} ${MONS[now.getMonth()]} ${now.getFullYear()}`;
+
+  // Saudi Calendar
+  const CAL=[
+    {name:'Eid Al-Adha 1447H',date:'2026-06-15',type:'holiday',note:'B2B pauses 4â5 days'},
+    {name:'Post-Eid Surge',date:'2026-06-20',type:'opportunity',note:'SMB renewals spike â activate conversion campaigns'},
+    {name:'Saudi National Day',date:'2026-09-23',type:'campaign',note:'Major brand campaign â start brief 6 weeks ahead'},
+    {name:'GITEX 2026',date:'2026-10-12',type:'event',note:'Lead gen opportunity â plan by August'},
+    {name:'End of Year (fiscal)',date:'2026-12-31',type:'deadline',note:'Budget lock & annual subscription push'},
+  ];
+  function diff(ds){return Math.round((new Date(ds+'T00:00:00')- new Date(now.getFullYear(),now.getMonth(),now.getDate()))/86400000);}
+  function badge(d){
+    if(d<0)return{cls:'cb-past',txt:Math.abs(d)+'d ago'};
+    if(d===0)return{cls:'cb-urgent',txt:'TODAY'};
+    if(d<=7)return{cls:'cb-urgent',txt:`In ${d}d`};
+    if(d<=30)return{cls:'cb-soon',txt:`In ${d}d`};
+    return{cls:'cb-ok',txt:`In ${d}d`};
+  }
+  const dotColor={holiday:'cal-red',opportunity:'cal-green',campaign:'cal-amber',event:'cal-blue',deadline:'cal-red'};
+  document.getElementById('calendarList').innerHTML=CAL.map(ev=>{
+    const d=diff(ev.date),b=badge(d);
+    return `<div class="cal-row" style="${d<0?'opacity:.4':''}">
+      <div class="cal-dot ${dotColor[ev.type]||'cal-blue'}"></div>
+      <div class="cal-event">${ev.name}<br><span style="font-size:10px;color:#94a3b8;font-weight:400">${ev.note}</span></div>
+      <div style="text-align:right"><div style="font-size:10px;color:#64748b">${ev.date}</div><span class="cal-badge ${b.cls}">${b.txt}</span></div>
+    </div>`;
+  }).join('');
+  const upcoming=CAL.filter(ev=>{const d=diff(ev.date);return d>=0&&d<=14;});
+  if(upcoming.length){
+    const ev=upcoming[0],d=diff(ev.date);
+    const isOpp=ev.type==='opportunity';
+    document.getElementById('calChip').textContent=`ð ${ev.name} ${d===0?'today':`in ${d}d`}`;
+    document.getElementById('calChip').style.display='';
+    document.getElementById('calAlerts').innerHTML=
+      `<div class="alert-bar ${isOpp?'alert-green':d<=3?'alert-red':'alert-amber'}">ð <strong>${ev.name}</strong> ${d===0?'is TODAY':`in ${d} day${d!==1?'s':''}`} â ${ev.note}</div>`;
+  }
+
+  // Helpers
+  function fmt(n){if(n==null)return'â';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return String(n);}
+  function fmtSAR(n){if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toFixed(0);}
+  function pct(done,total){return total>0?Math.round(done/total*100):0;}
+  function barColor(p){return p>=80?'#10b981':p>=50?'#f59e0b':'#ef4444';}
+  function pillCls(p){return p>=80?'pg':p>=50?'pw':'pr';}
+  function cl(id){const e=document.getElementById(id);if(e)e.classList.remove('loading');}
+
+  // ââ Fetch all in parallel ââââââââââââââââââââââââââââââ
+  const post=(url,body)=>fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json()).catch(()=>null);
+
+  const [projRes, taskRes, dwTodayRes, dwMonthRes, ldRes] = await Promise.all([
+    fetch('/api/asana/projects').then(r=>r.json()).catch(()=>null),
+    fetch('/api/asana/tasks').then(r=>r.json()).catch(()=>null),
+    post('/api/hubspot/deals',{
+      filterGroups:[{filters:[
+        {propertyName:'closedate',operator:'GTE',value:String(todayTs)},
+        {propertyName:'dealstage',operator:'EQ',value:'4296479984'}
+      ]}],
+      properties:['amount','deal_currency_code'],limit:200
+    }),
+    post('/api/hubspot/deals',{
+      filterGroups:[{filters:[
+        {propertyName:'closedate',operator:'GTE',value:String(monthTs)},
+        {propertyName:'dealstage',operator:'EQ',value:'4296479984'}
+      ]}],
+      properties:['amount'],limit:1
+    }),
+    post('/api/hubspot/contacts',{
+      filterGroups:[{filters:[{propertyName:'lifecyclestage',operator:'EQ',value:'lead'}]}],
+      properties:['lifecyclestage'],limit:1
+    }),
+  ]);
+
+  // ââ HubSpot cards ââââââââââââââââââââââââââââââââââââââ
+  let todayDeals=0, todayRev=0, monthDeals=0;
+  if(dwTodayRes&&!dwTodayRes.error){
+    const results=dwTodayRes.results||[];
+    todayDeals=dwTodayRes.total||0;
+    todayRev=results.reduce((s,d)=>s+parseFloat(d.properties?.amount||0),0);
+    cl('dwVal');cl('rvVal');
+    document.getElementById('dwVal').textContent=fmt(todayDeals);
+    document.getElementById('dwSub').textContent='closed won today';
+    document.getElementById('rvVal').textContent=fmtSAR(todayRev);
+    document.getElementById('rvSub').textContent=`SAR Â· ${results.length} sampled`;
+    if(todayDeals>0){const c=document.getElementById('dealsChip');c.textContent=`ð° ${fmt(todayDeals)} deals`;c.style.display='';}
+  }
+  if(dwMonthRes&&!dwMonthRes.error){
+    monthDeals=dwMonthRes.total||0;
+    cl('dwMonthVal');
+    document.getElementById('dwMonthVal').textContent=fmt(monthDeals);
+    document.getElementById('dwMonthSub').textContent=`this month Â· day ${dim}`;
+  }
+  if(ldRes&&!ldRes.error){
+    cl('ldTotalVal');
+    document.getElementById('ldTotalVal').textContent=fmt(ldRes.total||0);
+  }
+
+  // ââ Projects âââââââââââââââââââââââââââââââââââââââââââ
+  const MKT=['campaign','content','creative','digital','marketing','paid','organic','growth','awareness','community','kpi','gtm','cro','calendar','newsletter','brand','product','launch','ops','request','seo','media','freelancer'];
+  let mktProjs=[];
+  if(projRes&&projRes.data){
+    mktProjs=projRes.data.filter(p=>{
+      if(!p.task_counts||p.task_counts.num_tasks===0)return false;
+      return MKT.some(k=>p.name.toLowerCase().includes(k));
+    }).sort((a,b)=>(b.task_counts?.num_incomplete_tasks||0)-(a.task_counts?.num_incomplete_tasks||0));
+
+    let green=0,amber=0,red=0;
+    mktProjs.forEach(p=>{const pc=pct(p.task_counts.num_completed_tasks,p.task_counts.num_tasks);if(pc>=80)green++;else if(pc>=50)amber++;else red++;});
+    document.getElementById('allProjCount').textContent=`${mktProjs.length} projects`;
+    document.getElementById('projSummary').textContent=`ð¢${green} ð¡${amber} ð´${red}`;
+
+    new Chart(document.getElementById('healthChart').getContext('2d'),{
+      type:'doughnut',
+      data:{labels:['Healthy (>80%)','In Progress','At Risk (<50%)'],datasets:[{data:[green,amber,red],backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{backgroundColor:['#10b981','#f59e0b','#ef4444'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:9,padding:7}}}}
+    });
+
+    const risk=[...mktProjs].sort((a,b)=>pct(a.task_counts.num_completed_tasks,a.task_counts.num_tasks)-pct(b.task_counts.num_completed_tasks,b.task_counts.num_tasks)).slice(0,6);
+    document.getElementById('riskList').innerHTML=risk.map(p=>{
+      const tc=p.task_counts,pc=pct(tc.num_completed_tasks,tc.num_tasks);
+      return `<div class="proj-item">
+        <div class="proj-top"><span class="proj-name">${p.name.trim()}</span><span class="pct-pill ${pillCls(pc)}">${pc}%</span></div>
+        <div class="proj-meta">${tc.num_completed_tasks}/${tc.num_tasks} done Â· <strong style="color:${tc.num_incomplete_tasks>20?'#dc2626':'#64748b'}">${tc.num_incomplete_tasks} open</strong></div>
+        <div class="prog"><div class="prog-f" style="width:${pc}%;background:${barColor(pc)}"></div></div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('allProjList').innerHTML=mktProjs.map(p=>{
+      const tc=p.task_counts,pc=pct(tc.num_completed_tasks,tc.num_tasks);
+      return `<div class="proj-item">
+        <div class="proj-top"><span class="proj-name">${p.name.trim()}</span><span class="pct-pill ${pillCls(pc)}">${pc}%</span></div>
+        <div class="proj-meta">${tc.num_completed_tasks}/${tc.num_tasks} Â· ${tc.num_incomplete_tasks} open</div>
+        <div class="prog"><div class="prog-f" style="width:${pc}%;background:${barColor(pc)}"></div></div>
+      </div>`;
+    }).join('');
+
+    // Agent workload
+    const DIG=['campaign','paid','digital','gtm','growth','sectors','conversion','cro','snapchat',"tiktok','linkedin','youtube','keyword','performance','lacement','budget'];
+    const PRD=['content calendar','calendar squad','crm lifecycle','cross-functional',"newsletter','launch','organic'];
+    const CRe=['creative','awareness','community',"media'];
+    let dCt=0,pCt=0,cCt=0;
+    mktProjs.forEach(p=>{
+      const nm=p.name.toLowerCase(),inc=p.task_counts?.num_incomplete_tasks||0;
+      if(CRE.some(k=>nm.includes(k)))cCt+=inc;
+      else if(PRD.some(k=>nm.includes(k)))pCt+=inc;
+      else if(DIG.some(k=>nm.includes(k)))dCt+=inc;
+    });
+    ['digital','product','creative'].forEach((id,i)=>{
+      const el=document.getElementById('ag-'+id);
+      if(!el)return;
+      el.classList.remove('loading');
+      el.textContent=[dCt,pCt,cCt][i]+' open tasks';
+    });
+    new Chart(document.getElementById('agentChart').getContext('2d'),{
+      type:'bar',
+      data:{labels:['Digital','Product','Creative','Affiliate'],datasets:[{label:'Open tasks',data:[dCt,pCt,cCt,0],backgroundColor:['#3b82f6','#8b5cf6','#ec4899','#cbd5e1'],borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:#f8fafc'},ticks:{font:{size:10}}}}}
+    });
+  }
+
+  // ââ Tasks âââââââââââââââââââââââââââââââââââââââââââââ
+  if(taskRes&&taskRes.data){
+    const today0=new Date();today0.setHours(0,0,0,0);
+    const soon=new Date(today0);soon.setDate(soon.getDate()+7);
+    let ovCount=0;
+    const sorted=[...taskRes.data].sort((a,b)=>{
+      if(!a.due_on&&!b.due_on)return 0;if(!a.due_on)return 1;if(!b.due_on)return -1;
+      return new Date(a.due_on)-new Date(b.due_on);
+    });
+    document.getElementById('taskCount').textContent=`${taskRes.data.length} open`;
+    document.getElementById('taskList').innerHTML=sorted.slice(0,30).map(t=>{
+      let cls='tok',or txt='No date',rc='';
+      if(t.due_on){
+        const d=new Date(t.due_on+'T00:00:00');
+        if(d<today0){const days=Math.floor((today0-d)/86400000);cls='tov';txt=`${days}d overdue`;rc='ov';ovCount++;}
+        else if(d<=soon){cls='tsn';txt=`Due ${t.due_on}`;rc='sn';}
+        else{txt=t.due_on;}
+      }
+      const nm=t.name.length>46?t.name.substring(0,46)+'â¦':t.name;
+      return `<div class="task-row ${rc}"><span class="task-nm">${nm}</span><span class="task-due ${cls}">${txt}</span></div>`;
+    }).join('');
+    if(ovCount>0){
+      document.getElementById('overdueAlert').innerHTML=f<div class="alert-bar alert-red">ð´ ${ovCount} overdue task${ovCount>1?'s':''} need attention</div>`;
+      document.getElementById('overdueAlert').style.display='';
+      const c=document.getElementById('overdueChip');c.textContent=`ð´ ${ovCount} overdue`;c.style.display='';
+    }
+  }
+
+  // ââ Velocity chart âââââââââââââââââââââââââââââââââââââ
+  const dailyAvg=monthDeals>0?Math.round(monthDeals/dim):0;
+  new Chart(document.getElementById('velocityChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:['Today','Daily avg (month)'],datasets:[{label:'Deals Won',data:[todayDeals,dailyAvg],backgroundColor:['#4338ca','#c7d2fe'],borderRadius:8}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{ticks:{size:10,maxTicksLimit:4}}}}
+  });
+
+  // ââ Rule-based analysis ââââââââââââââââââââââââââââââââ
+  const insights=[];
+  if(dailyAvg>0){
+    const delta=Math.round((todayDeals/dailyAvg-1)*100);
+  if(todayDeals<dailyAvg*0.7)insights.push(`Deal velocity is <strong>${Math.abs(delta)}% below</strong> this month's daily average (${todayDeals} vs ${dailyAvg}/day) â verify before EOD if it's timing or a real dip.`);
+    else if(todayDeals>dailyAvg*1.2)insights.push(`Deal velocity is <strong>${delta}% above</strong> daily average today (${todayDeals} vs ${dailyAvg}/day) â strong day. Check HEX for what's driving it.`);
+    else insights.push(`On pace for <strong>~${Math.round(dailyAvg*30)}</strong> deals this month (${monthDeals} by day ${dim}, avg ${dailyAvg}/day) â tracking normally.`);
+  }
+  const riskP=mktProjs.filter(p=>pct(p.task_counts.num_completed_tasks,p.task_counts.num_tasks)<50).slice(0,2);
+  if(riskP.length){
+    const p=riskP[0];
+    insights.push(`<strong>${p.name.trim()}</strong> is at ${pct(p.task_counts.num_completed_tasks,p.task_counts.num_tasks)}% with ${p.task_counts.num_incomplete_tasks} open tasks â biggest Asana blocker. Needs owner accountability or scope cut.`);
+  }
+  const nextEvent=CAL.find(ev=>{const d=diff(ev.date);return d>=0&&d<=60;});
+  if(nextEvent){
+    const d=diff(nextEvent.date);
+    if(nextEvent.type==='opportunity')insights.push(`<strong>${nextEvent.name}</strong> is in ${d} days â SMB renewal spike incoming. Make sure conversion campaigns and CRM sequences are live.`);
+    else if(d<=14)insights.push(`<strong>${nextEvent.name}</strong> in ${d} days â ${nextEvent.note}.`);
+  }
+  if(insights.length===0)insights.push('All systems tracking normally â co major alerts today.');
+  document.getElementById('aiBody').innerHTML=insights.map((ins,i)=>`<div class="ai-insight"><span class="ai-num">${i+1}</span>${ins}</div>`).join('');
+  document.getElementById('aiStatus').textContent='Updated';
+
+  document.getElementById('footer').textContent=`Last refreshed ${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})} Â· Click â» to update`;
+})();
+</script>
+</body>
+</html>
